@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChemLab Adventures Ultimate</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Poppins:wght@300;500;700&display=swap');
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: #fff;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        button {
+            padding: 12px 24px;
+            margin: 12px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 50px;
+            background: linear-gradient(to right, #00c6ff, #0072ff);
+            color: white;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+            background: linear-gradient(to right, #0072ff, #00c6ff);
+        }
+
+        #menu, #level-select, #game-area {
+            padding: 30px;
+            border-radius: 20px;
+            margin: 20px auto;
+            width: 90%;
+            max-width: 650px;
+            background-color: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            color: #333;
+        }
+
+        h1 {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            color: #0072ff;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            font-family: 'Montserrat', sans-serif;
+            color: #0072ff;
+            margin-bottom: 20px;
+        }
+
+        /* Memory Game Styles */
+        #timer {
+            font-size: 22px;
+            font-weight: bold;
+            color: #0072ff;
+            background-color: rgba(255, 255, 255, 0.6);
+            padding: 8px 15px;
+            border-radius: 12px;
+            margin: 10px 0;
+            display: inline-block;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+        }
+        
+        .card {
+            width: 120px;
+            height: 120px;
+            display: inline-block;
+            margin: 10px;
+            background: linear-gradient(145deg, #8e9eab, #eef2f3);
+            position: relative;
+            cursor: pointer;
+            border-radius: 12px;
+            color: black;
+            font-weight: bold;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transform-style: preserve-3d;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+
+        .card.flipped {
+            transform: rotateY(180deg);
+            background: white;
+        }
+
+        .card.matched {
+            background: linear-gradient(145deg, #a8ff78, #78ffd6);
+            transform: rotateY(180deg) scale(1.05);
+        }
+
+        .card .content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotateY(180deg);
+            backface-visibility: hidden;
+            font-size: 20px;
+            display: none;
+            width: 100%;
+            text-align: center;
+        }
+
+        .card.flipped .content {
+            display: block;
+        }   
+
+        /* Tebak Hidrokarbon Styles */
+        #clue {
+            font-size: 18px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #e0f7fa;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+        
+        #wordDisplay {
+            font-size: 36px;
+            letter-spacing: 10px;
+            margin: 30px 0;
+            font-family: monospace;
+            font-weight: bold;
+            color: #0072ff;
+        }
+        
+        #keyboard {
+            margin: 20px auto;
+        }
+        
+        #keyboard button {
+            margin: 5px;
+            padding: 12px;
+            font-size: 16px;
+            width: 48px;
+            height: 48px;
+            cursor: pointer;
+            border-radius: 50%;
+            background: linear-gradient(to bottom right, #4facfe, #00f2fe);
+            color: white;
+            border: none;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        #keyboard button:hover {
+            transform: translateY(-3px);
+            background: linear-gradient(to bottom right, #0072ff, #00c6ff);
+        }
+        
+        #keyboard button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        #lives {
+            font-size: 18px;
+            margin-top: 15px;
+            color: #f44336;
+            font-weight: bold;
+        }
+        
+        #status {
+            font-size: 20px;
+            font-weight: bold;
+            margin-top: 25px;
+            padding: 15px;
+            border-radius: 12px;
+        }
+
+        /* Collector Game Styles */
+        #collector-canvas {
+            background: linear-gradient(to bottom, #e0e0e0, #f5f5f5);
+            border: none;
+            margin-top: 15px;
+            width: 100%;
+            max-width: 600px;
+            height: auto;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+
+        .game-info {
+            font-size: 18px;
+            margin: 15px 0;
+            padding: 15px;
+            background-color: rgba(227, 242, 253, 0.8);
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        /* Game section animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        #menu, #level-select, #game-area {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        /* Game title glow effect */
+        h1 {
+            position: relative;
+        }
+
+        h1:after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 10px;
+            border-radius: 5px;
+            background: linear-gradient(to right, transparent, rgba(0, 114, 255, 0.3), transparent);
+            bottom: -10px;
+            left: 0;
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 600px) {
+            .card {
+                width: 80px;
+                height: 80px;
+            }
+
+            button {
+                padding: 10px 20px;
+                font-size: 14px;
+            }
+
+            #keyboard button {
+                width: 36px;
+                height: 36px;
+                padding: 8px;
+                font-size: 14px;
+            }
+
+            #wordDisplay {
+                font-size: 28px;
+                letter-spacing: 5px;
+            }
+
+            /* Control buttons for mobile */
+            .control-button {
+                position: fixed;
+                bottom: 20px;
+                width: 70px;
+                height: 70px;
+                border-radius: 50%;
+                background: linear-gradient(to right, #00c6ff, #0072ff);
+                color: white;
+                font-size: 28px;
+                border: none;
+                cursor: pointer;
+                z-index: 100;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .left-button {
+                left: 20px;
+            }
+
+            .right-button {
+                right: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="menu">
+        <h1>🧪 ChemLab Adventures Ultimate 🧪</h1>
+        <button id="start-game">Pilih Mode Permainan</button>
+        <button onclick="alert('Terima kasih telah bermain!')">Keluar</button>
+    </div>
+
+    <div id="level-select" class="hidden">
+        <h2>Pilih Mode Permainan</h2>
+        <button id="memory-game">Mode Ingatan (Memory Game)</button>
+        <button id="hydrocarbon-game">Mode Tebak Hidrokarbon</button>
+        <button id="collector-game">Mode Kolektor (Collection Game)</button>
+        <button onclick="showSection('menu')">Kembali ke Menu</button>
+    </div>
+
+    <div id="game-area" class="hidden">
+        <h2 id="game-title">Mode Permainan</h2>
+        <div id="game-content"></div>
+        <button onclick="resetGame()">Kembali ke Menu</button>
+    </div>
+
+    <script>
+        // COMMON VARIABLES AND FUNCTIONS
+        document.getElementById('start-game').onclick = () => showSection('level-select');
+        document.getElementById('memory-game').onclick = () => startMemoryGame();
+        document.getElementById('hydrocarbon-game').onclick = () => startHydrocarbonGame();
+        document.getElementById('collector-game').onclick = () => startCollectorGame();
+
+        function showSection(id) {
+            document.getElementById('menu').classList.add('hidden');
+            document.getElementById('level-select').classList.add('hidden');
+            document.getElementById('game-area').classList.add('hidden');
+            document.getElementById(id).classList.remove('hidden');
+        }
+
+        function resetGame() {
+            // Clear any intervals
+            if (collectorInterval) clearInterval(collectorInterval);
+            if (timerInterval) clearInterval(timerInterval);
+            
+            // Remove control buttons if they exist
+            const controlButtons = document.querySelectorAll('.control-button');
+            controlButtons.forEach(button => button.remove());
+            
+            showSection('level-select');
+        }
+
+        // --------------------------
+        // MEMORY GAME IMPLEMENTATION
+        // --------------------------
+        const elements = [
+            { symbol: "H", name: "Hidrogen", color: "#3498db" },
+            { symbol: "He", name: "Helium", color: "#9b59b6" },
+            { symbol: "Li", name: "Litium", color: "#e74c3c" },
+            { symbol: "Be", name: "Berilium", color: "#2ecc71" },
+            { symbol: "B", name: "Boron", color: "#e67e22" },
+            { symbol: "C", name: "Karbon", color: "#34495e" },
+            { symbol: "N", name: "Nitrogen", color: "#2c3e50" },
+            { symbol: "O", name: "Oksigen", color: "#c0392b" }
+        ];
+
+        let selectedCards = [];
+        let matchedCards = [];
+        let memoryScore = 0;
+        let timerInterval;
+        let secondsElapsed = 0;
+
+        function startMemoryGame() {
+            showSection('game-area');
+            document.getElementById('game-title').innerText = "Mode Ingatan";
+            setupMemoryGame();
+        }
+
+        function setupMemoryGame() {
+            const gameContent = document.getElementById('game-content');
+            gameContent.innerHTML = `
+                <div class="game-info">
+                    <p>Cocokkan simbol unsur dengan namanya!</p>
+                    Skor: <span id="score">0</span>
+                </div>
+                <div id="timer">Waktu: 00:00</div>
+                <div id="memory-cards"></div>
+            `;
+            
+            const memoryCardsDiv = document.getElementById('memory-cards');
+            selectedCards = [];
+            matchedCards = [];
+            memoryScore = 0;
+            secondsElapsed = 0;
+            document.getElementById('score').innerText = memoryScore;
+            
+            // Start the timer
+            if (timerInterval) clearInterval(timerInterval);
+            updateTimer();
+            timerInterval = setInterval(updateTimer, 1000);
+
+            // Create pairs: 1 symbol + 1 name for each element
+            let cards = [];
+            elements.forEach(e => {
+                cards.push({ type: 'symbol', value: e.symbol, match: e.name, color: e.color });
+                cards.push({ type: 'name', value: e.name, match: e.symbol, color: e.color });
+            });
+
+            // Randomize cards
+            cards = cards.sort(() => Math.random() - 0.5);
+
+            // Create card HTML elements
+            cards.forEach((card, index) => {
+                const div = document.createElement('div');
+                div.className = 'card';
+                div.dataset.index = index;
+                div.dataset.type = card.type;
+                div.dataset.value = card.value;
+                div.dataset.match = card.match;
+                div.dataset.color = card.color;
+
+                const content = document.createElement('div');
+                content.className = 'content';
+                content.innerText = card.value;
+                
+                // Ensure proper contrast with background
+                content.style.color = isLightColor(card.color) ? 'black' : 'white';
+
+                div.appendChild(content);
+                memoryCardsDiv.appendChild(div);
+
+                div.onclick = () => flipCard(div);
+            });
+        }
+
+        function isLightColor(color) {
+            // Check if the color is light (for text contrast)
+            const r = parseInt(color.substr(1, 2), 16);
+            const g = parseInt(color.substr(3, 2), 16);
+            const b = parseInt(color.substr(5, 2), 16);
+            const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+            return brightness > 128;
+        }
+
+        function updateTimer() {
+            secondsElapsed++;
+            document.getElementById('timer').innerText = `Waktu: ${formatTime(secondsElapsed)}`;
+        }
+        
+        function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = seconds % 60;
+            return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+        }
+
+        function flipCard(card) {
+            if (card.classList.contains('flipped') || card.classList.contains('matched') || selectedCards.length >= 2) return;
+
+            card.classList.add('flipped');
+            card.style.backgroundColor = card.dataset.color;
+            selectedCards.push(card);
+
+            if (selectedCards.length === 2) {
+                setTimeout(checkMatch, 800);
+            }
+        }
+
+        function checkMatch() {
+            const [first, second] = selectedCards;
+            
+            if (
+                (first.dataset.value === second.dataset.match && second.dataset.value === first.dataset.match)
+            ) {
+                // Match found
+                first.classList.add('matched');
+                second.classList.add('matched');
+                matchedCards.push(first, second);
+                memoryScore += 10;
+                document.getElementById('score').innerText = memoryScore;
+
+                if (matchedCards.length === elements.length * 2) {
+                    clearInterval(timerInterval);
+                    const timeString = formatTime(secondsElapsed);
+                    setTimeout(() => {
+                        alert(`Selamat! Anda mencocokkan semua unsur!\nSkor akhir: ${memoryScore}\nWaktu: ${timeString}`);
+                        resetGame();
+                    }, 500);
+                }
+            } else {
+                // No match
+                setTimeout(() => {
+                    first.classList.remove('flipped');
+                    second.classList.remove('flipped');
+                    first.style.backgroundColor = '';
+                    second.style.backgroundColor = '';
+                }, 500);
+            }
+            selectedCards = [];
+        }
+
+        // ------------------------------
+        // HYDROCARBON GAME IMPLEMENTATION
+        // ------------------------------
+        const soal = [
+            { nama: "metana", petunjuk: "Alkana paling sederhana" },
+            { nama: "propana", petunjuk: "Alkana dengan 3 atom karbon" },
+            { nama: "butena", petunjuk: "Alkena dengan 4 atom karbon" },
+            { nama: "etuna", petunjuk: "Alkuna dengan 2 atom karbon" },
+            { nama: "benzena", petunjuk: "Senyawa aromatik paling dikenal" },
+            { nama: "butuna", petunjuk: "Alkuna dengan 4 atom karbon" },
+            { nama: "pentana", petunjuk: "Alkana dengan 5 atom karbon" },
+            { nama: "heksana", petunjuk: "Alkana dengan 6 atom karbon" },
+            { nama: "propena", petunjuk: "Alkena dengan 3 atom karbon" },
+            { nama: "etana", petunjuk: "Alkana dengan 2 atom karbon" }
+        ];
+
+        let jawaban, tebakan, nyawa, hydrocarbonScore;
+
+        function startHydrocarbonGame() {
+            showSection('game-area');
+            document.getElementById('game-title').innerText = "Mode Tebak Hidrokarbon";
+            setupHydrocarbonGame();
+        }
+
+        function setupHydrocarbonGame() {
+            // Reset variables
+            hydrocarbonScore = 0;
+            setupNewHydrocarbonRound();
+        }
+
+        function setupNewHydrocarbonRound() {
+            const gameContent = document.getElementById('game-content');
+            gameContent.innerHTML = `
+                <div class="game-info">
+                    <p>Tebak nama senyawa hidrokarbon!</p>
+                    Skor: <span id="hydrocarbon-score">${hydrocarbonScore}</span>
+                </div>
+                <div id="clue">Petunjuk akan muncul di sini</div>
+                <div id="wordDisplay"></div>
+                <div id="keyboard"></div>
+                <div id="lives">Nyawa: 5</div>
+                <div id="status"></div>
+            `;
+
+            // Select a random hydrocarbon
+            const pilih = soal[Math.floor(Math.random() * soal.length)];
+            jawaban = pilih.nama.toLowerCase();
+            tebakan = Array(jawaban.length).fill("_");
+            nyawa = 5;
+
+            document.getElementById("clue").innerText = "Petunjuk: " + pilih.petunjuk;
+            document.getElementById("wordDisplay").innerText = tebakan.join(" ");
+            document.getElementById("lives").innerText = "Nyawa: " + nyawa;
+
+            buatKeyboard();
+        }
+
+        function buatKeyboard() {
+            const abjad = "abcdefghijklmnopqrstuvwxyz";
+            const keyboard = document.getElementById("keyboard");
+            keyboard.innerHTML = ''; // Clear previous keyboard
+            
+            for (let huruf of abjad) {
+                const tombol = document.createElement("button");
+                tombol.innerText = huruf;
+                tombol.onclick = () => cekHuruf(huruf, tombol);
+                keyboard.appendChild(tombol);
+            }
+        }
+
+        function cekHuruf(huruf, tombol) {
+            tombol.disabled = true;
+            let benar = false;
+            
+            for (let i = 0; i < jawaban.length; i++) {
+                if (jawaban[i] === huruf) {
+                    tebakan[i] = huruf;
+                    benar = true;
+                }
+            }
+
+            document.getElementById("wordDisplay").innerText = tebakan.join(" ");
+
+            if (!benar) {
+                nyawa--;
+                document.getElementById("lives").innerText = "Nyawa: " + nyawa;
+            }
+
+            if (tebakan.join("") === jawaban) {
+                hydrocarbonScore += 10;
+                document.getElementById("hydrocarbon-score").innerText = hydrocarbonScore;
+                document.getElementById("status").innerText = "✅ Benar! Jawabannya: " + jawaban.toUpperCase();
+                document.getElementById("status").style.backgroundColor = "#d4edda";
+                
+                // Show next round button
+                const nextButton = document.createElement("button");
+                nextButton.innerText = "Ronde Berikutnya";
+                nextButton.onclick = setupNewHydrocarbonRound;
+                document.getElementById("status").appendChild(document.createElement("br"));
+                document.getElementById("status").appendChild(nextButton);
+                
+                nonaktifkanKeyboard();
+            } else if (nyawa === 0) {
+                document.getElementById("status").innerText = "💀 Kamu kalah! Jawabannya: " + jawaban.toUpperCase();
+                document.getElementById("status").style.backgroundColor = "#f8d7da";
+                
+                // Show try again button
+                const tryAgainButton = document.createElement("button");
+                tryAgainButton.innerText = "Coba Lagi";
+                tryAgainButton.onclick = setupNewHydrocarbonRound;
+                document.getElementById("status").appendChild(document.createElement("br"));
+                document.getElementById("status").appendChild(tryAgainButton);
+                
+                nonaktifkanKeyboard();
+            }
+        }
+
+        function nonaktifkanKeyboard() {
+            document.querySelectorAll("#keyboard button").forEach(btn => btn.disabled = true);
+        }
+
+        // ------------------------------
+        // COLLECTOR GAME IMPLEMENTATION
+        // ------------------------------
+        let collectorInterval;
+        let player, fallingElements = [], collectorScore = 0, lives = 3, level = 1, targets = [];
+
+        function startCollectorGame() {
+            showSection('game-area');
+            document.getElementById('game-title').innerText = "Mode Kolektor";
+            setupCollectorGame();
+        }
+
+        function setupCollectorGame() {
+            const gameContent = document.getElementById('game-content');
+            gameContent.innerHTML = `
+                <div class="game-info">
+                    <p>Tangkap unsur kimia yang ditargetkan!</p>
+                    Skor: <span id="collector-score">0</span> |
+                    Nyawa: <span id="collector-lives">3</span> |
+                    Level: <span id="collector-level">1</span>
+                </div>
+                <div class="game-info">Target: <span id="collector-targets"></span></div>
+                <canvas id="collector-canvas" width="600" height="400"></canvas>
+            `;
+
+            const canvas = document.getElementById('collector-canvas');
+            canvas.height = Math.min(400, window.innerHeight * 0.5);
+            const ctx = canvas.getContext('2d');
+
+            player = { x: canvas.width / 2 - 30, width: 60, height: 20 };
+            fallingElements = [];
+            collectorScore = 0;
+            lives = 3;
+            level = 1;
+
+            nextLevel();
+
+            // Keyboard controls
+            let keys = {};
+            document.onkeydown = e => {
+                keys[e.key] = true;
+                // Prevent scrolling with arrow keys
+                if(['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) {
+                    e.preventDefault();
+                }
+            };
+            document.onkeyup = e => keys[e.key] = false;
+
+            // Mobile controls
+            const leftButton = document.createElement('button');
+            leftButton.className = 'control-button left-button';
+            leftButton.innerText = '←';
+            leftButton.ontouchstart = () => { leftPressed = true; };
+            leftButton.ontouchend = () => { leftPressed = false; };
+
+            const rightButton = document.createElement('button');
+            rightButton.className = 'control-button right-button';
+            rightButton.innerText = '→';
+            rightButton.ontouchstart = () => { rightPressed = true; };
+            rightButton.ontouchend = () => { rightPressed = false; };
+
+            document.body.appendChild(leftButton);
+            document.body.appendChild(rightButton);
+
+            let leftPressed = false;
+            let rightPressed = false;
+
+            collectorInterval = setInterval(() => {
+                // Process keyboard input
+                if (keys.ArrowLeft || leftPressed) {
+                    player.x -= 8;
+                    player.x = Math.max(0, player.x);
+                }
+                if (keys.ArrowRight || rightPressed) {
+                    player.x += 8;
+                    player.x = Math.min(canvas.width - player.width, player.x);
+                }
+
+                // Spawn elements
+                if (Math.random() < 0.03 + level * 0.005) spawnElement(canvas.width);
+
+                // Update element positions
+                fallingElements.forEach(e => e.y += e.speed);
+                fallingElements = fallingElements.filter(e => {
+                    // Check for collision with player
+                    if (e.y + 20 >= canvas.height - player.height &&
+                        e.x > player.x && e.x < player.x + player.width) {
+                        return handleCatch(e);
+                    }
+                    // Remove elements that fall off screen
+                    return e.y < canvas.height;
+                });
+
+                // Draw game
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                // Draw player
+                ctx.fillStyle = "#0072ff";
+                ctx.fillRect(player.x, canvas.height - player.height, player.width, player.height);
+                
+                // Draw falling elements
+                fallingElements.forEach(e => {
+                    // Draw element circle with shadow
+                    ctx.shadowBlur = 10;
+                    ctx.shadowColor = "rgba(0,0,0,0.3)";
+                    ctx.fillStyle = e.color;
+                    ctx.beginPath();
+                    ctx.arc(e.x, e.y, 20, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    // Remove shadow for text
+                    ctx.shadowBlur = 0;
+                    
+                    // Draw element symbol
+                    ctx.fillStyle = isLightColor(e.color) ? "black" : "white";
+                    ctx.font = "bold 16px Arial";
+                    ctx.textAlign = "center";
+                    ctx.fillText(e.symbol, e.x, e.y + 5);
+                });
+
+                // Update UI
+                document.getElementById('collector-score').innerText = collectorScore;
+                document.getElementById('collector-lives').innerText = lives;
+                document.getElementById('collector-level').innerText = level;
+                document.getElementById('collector-targets').innerText = targets.map(t => t.symbol).join(', ');
+
+                // Check game end condition
+                if (lives <= 0) {
+                    clearInterval(collectorInterval);
+                    alert("Game Over! Skor Anda: " + collectorScore);
+                    resetGame();
+                }
+
+                // Check level completion
+                if (targets.length === 0) {
+                    level++;
+                    nextLevel();
+                }
+            }, 50);
+        }
+
+        function spawnElement(canvasWidth) {
+            const elem = elements[Math.floor(Math.random() * elements.length)];
+            fallingElements.push({
+                x: Math.random() * (canvasWidth - 40) + 20,
+                y: -20,
+                speed: 2 + Math.random() * level,
+                symbol: elem.symbol,
+                name: elem.name,
+                color: elem.color
+            });
+        }
+
+        function handleCatch(element) {
+            const index = targets.findIndex(t => t.symbol === element.symbol);
+            if (index !== -1) {
+                targets.splice(index, 1);
+                collectorScore += 10 * level;
+            } else {
+                lives--;
+            }
+            return false;
+        }
+
+        function nextLevel() {
+            // Select random elements as targets for this level
+            targets = [...elements]
+                .sort(() => 0.5 - Math.random())
+                .slice(0, Math.min(3 + Math.floor(level / 2), elements.length));
+        }
+    </script>
+</body>
+</html>
